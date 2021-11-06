@@ -15,7 +15,7 @@ parser.add_argument('--in_ngc', type=int, default=3, help='input channel for gen
 parser.add_argument('--out_ngc', type=int, default=3, help='output channel for generator')
 parser.add_argument('--in_ndc', type=int, default=3, help='input channel for discriminator')
 parser.add_argument('--out_ndc', type=int, default=1, help='output channel for discriminator')
-parser.add_argument('--batch_size', type=int, default=8, help='batch size')
+parser.add_argument('--batch_size', type=int, default=50, help='batch size')
 parser.add_argument('--ngf', type=int, default=64)
 parser.add_argument('--ndf', type=int, default=32)
 parser.add_argument('--nb', type=int, default=8, help='the number of resnet block layer for generator')
@@ -37,6 +37,8 @@ for k, v in sorted(vars(args).items()):
 print('-------------- End ----------------')
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+if(torch.cuda.is_available()): print("cuda is available")
+else: print("cuda is not available")
 if torch.backends.cudnn.enabled:
     torch.backends.cudnn.benchmark = True
 
@@ -115,9 +117,12 @@ if args.latest_generator_model == '':
     print('Pre-training start!')
     start_time = time.time()
     for epoch in range(args.pre_train_epoch):
+        print("pre-train epoch:",epoch,"/",args.pre_train_epoch)
         epoch_start_time = time.time()
         Recon_losses = []
+        count=0
         for x, _ in train_loader_src:
+            print("pre-train:",count,"/",len(train_loader_src))
             x = x.to(device)
 
             # train generator G
@@ -133,6 +138,7 @@ if args.latest_generator_model == '':
 
             Recon_loss.backward()
             G_optimizer.step()
+            count+=1
 
         per_epoch_time = time.time() - epoch_start_time
         pre_train_hist['per_epoch_time'].append(per_epoch_time)
