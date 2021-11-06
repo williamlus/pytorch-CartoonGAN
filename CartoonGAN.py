@@ -183,6 +183,7 @@ start_time = time.time()
 real = torch.ones(args.batch_size, 1, args.input_size // 4, args.input_size // 4).to(device)
 fake = torch.zeros(args.batch_size, 1, args.input_size // 4, args.input_size // 4).to(device)
 for epoch in range(args.train_epoch):
+    print("train epoch:",epoch,"/",args.train_epoch)
     epoch_start_time = time.time()
     G.train()
     G_scheduler.step()
@@ -190,7 +191,9 @@ for epoch in range(args.train_epoch):
     Disc_losses = []
     Gen_losses = []
     Con_losses = []
+    count=0
     for (x, _), (y, _) in zip(train_loader_src, train_loader_tgt):
+        print("train:",count,"/",len(train_loader_src))
         e = y[:, :, :, args.input_size:]
         y = y[:, :, :, :args.input_size]
         x, y, e = x.to(device), y.to(device), e.to(device)
@@ -234,6 +237,7 @@ for epoch in range(args.train_epoch):
 
         Gen_loss.backward()
         G_optimizer.step()
+        count+=1
 
 
     per_epoch_time = time.time() - epoch_start_time
